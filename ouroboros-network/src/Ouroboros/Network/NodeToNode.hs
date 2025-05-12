@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE NamedFieldPuns      #-}
@@ -117,7 +118,11 @@ import Data.Functor (void)
 import Data.Void (Void)
 import Data.Word
 import Network.Mux qualified as Mx
+#if !defined(wasm32_HOST_ARCH)
 import Network.Socket (Socket, StructLinger (..))
+#else
+import Network.Socket (Socket)
+#endif
 import Network.Socket qualified as Socket
 
 import Ouroboros.Network.BlockFetch.Client (BlockFetchProtocolFailure)
@@ -457,6 +462,7 @@ connectTo
   -> Maybe Socket.SockAddr
   -> Socket.SockAddr
   -> IO (Either SomeException (Either a b))
+#if !defined(wasm32_HOST_ARCH)
 connectTo sn tr =
     connectToNode sn makeSocketBearer
                   ConnectToArgs {
@@ -474,7 +480,9 @@ connectTo sn tr =
         Socket.setSockOpt sock Socket.Linger
                               (StructLinger { sl_onoff  = 1,
                                               sl_linger = 0 })
-
+#else
+connectTo _ _ = error "connecTo not supported in wasm"
+#endif
 
 -- | A specialised version of @'Ouroboros.Network.Socket.withServerNode'@.
 -- It forks a thread which runs an accept loop (server thread):

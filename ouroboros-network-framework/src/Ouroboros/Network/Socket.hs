@@ -79,7 +79,9 @@ import Control.Monad.Class.MonadAsync
 -- TODO: remove this, it will not be needed when `orElse` PR will be merged.
 import Codec.CBOR.Read qualified as CBOR
 import Codec.CBOR.Term qualified as CBOR
+#if !defined(wasm32_HOST_ARCH)
 import Control.Monad (unless, when)
+#endif
 import Control.Monad.Class.MonadThrow
 import Control.Monad.Class.MonadTime.SI
 import Control.Monad.Class.MonadTimer.SI
@@ -97,8 +99,11 @@ import GHC.IO.Exception
 #if !defined(mingw32_HOST_OS)
 import Foreign.C.Error
 #endif
-
+#if !defined(wasm32_HOST_ARCH)
 import Network.Socket (SockAddr, Socket, StructLinger (..))
+#else
+import Network.Socket (SockAddr, Socket)
+#endif
 import Network.Socket qualified as Socket
 
 import Control.Tracer
@@ -166,6 +171,7 @@ sockAddrFamily (Socket.SockAddrUnix _       ) = Socket.AF_UNIX
 -- is expected.
 --
 configureSocket :: Socket -> Maybe SockAddr -> IO ()
+#if !defined(wasm32_HOST_ARCH)
 configureSocket sock addr = do
     let fml = sockAddrFamily <$> addr
     Socket.setSocketOption sock Socket.ReuseAddr 1
@@ -187,7 +193,10 @@ configureSocket sock addr = do
       -- it is enabled by default on some systems. Disabled here since we run a separate
       -- IPv4 server instance if configured to use IPv4.
       $ Socket.setSocketOption sock Socket.IPv6Only 1
-
+#else
+configureSocket _ _ =
+    error "configureSocket not supported in wasm"
+#endif
 
 -- | Configure sockets passed through systemd socket activation.
 -- Currently 'ReuseAddr' and 'Linger' options are not configurable with
@@ -195,6 +204,7 @@ configureSocket sock addr = do
 -- options we only trace if they are not set.
 --
 configureSystemdSocket :: Tracer IO SystemdSocketTracer -> Socket -> SockAddr -> IO ()
+#if !defined(wasm32_HOST_ARCH)
 configureSystemdSocket tracer sock addr = do
    let fml = sockAddrFamily addr
    case fml of
@@ -220,6 +230,10 @@ configureSystemdSocket tracer sock addr = do
      ipv6OnlyOpt <- Socket.getSocketOption sock Socket.IPv6Only
      unless (ipv6OnlyOpt /= 0) $
        traceWith tracer (SocketOptionNotSet Socket.IPv6Only)
+#else
+configureSystemdSocket _ _ _ =
+    error "configureSystemdSocket not supported in wasm"
+#endif
 
 data SystemdSocketTracer = SocketOptionNotSet Socket.SocketOption
   deriving Show
