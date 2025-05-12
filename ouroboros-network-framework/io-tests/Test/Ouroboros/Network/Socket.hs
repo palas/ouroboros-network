@@ -6,6 +6,7 @@
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE NamedFieldPuns      #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 
 {-# OPTIONS_GHC -Wno-orphans     #-}
 module Test.Ouroboros.Network.Socket (tests) where

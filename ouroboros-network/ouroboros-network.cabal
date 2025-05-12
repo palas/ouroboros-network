@@ -388,6 +388,8 @@ library testlib
 -- (i.e. they don't require system call API provided by `Win32-network` or
 -- `network` dependency).  test-suite sim-tests
 test-suite sim-tests
+  if arch(wasm32)
+    buildable: False
   import: ghc-options-tests
   default-language: Haskell2010
   default-extensions: ImportQualifiedPost
@@ -414,6 +416,8 @@ test-suite sim-tests
 -- platforms: x86_64-w64-mingw32 (Windows), x86_64-linux, x86-64-darwin and
 -- aarch64-darwin.
 test-suite io-tests
+  if arch(wasm32)
+    buildable: False
   import: ghc-options-tests
   type: exitcode-stdio-1.0
   hs-source-dirs: io-tests
@@ -460,6 +464,8 @@ test-suite io-tests
     -RTS
 
 executable demo-chain-sync
+  if arch(wasm32)
+    buildable: False
   import: ghc-options
   hs-source-dirs: demo
   main-is: chain-sync.hs
