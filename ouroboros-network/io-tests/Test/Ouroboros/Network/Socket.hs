@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE FlexibleContexts    #-}
@@ -60,6 +61,10 @@ import Test.Tasty.QuickCheck (testProperty)
 import Text.Printf
 import Text.Show.Functions ()
 
+#if !defined(wasm32_HOST_ARCH)
+#else
+      , x <= 0x7fffffff
+#endif
 
 --
 -- The list of all tests

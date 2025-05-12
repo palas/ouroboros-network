@@ -231,6 +231,7 @@ library orphan-instances
   if flag(asserts)
     ghc-options: -fno-ignore-asserts
 
+
 library cardano-diffusion
   import: ghc-options
   visibility: public
@@ -300,6 +301,10 @@ library cardano-diffusion
 
   if flag(asserts)
     ghc-options: -fno-ignore-asserts
+
+  if !arch(wasm32)
+    ghc-options:
+      -threaded
 
 -- Simulation Test Library
 library testlib
@@ -410,11 +415,14 @@ test-suite sim-tests
 
   ghc-options:
     -fno-ignore-asserts
-    -threaded
-    -rtsopts
-    +RTS
-    -T
-    -RTS
+
+  if !arch(wasm32)
+    ghc-options:
+      -threaded
+      -rtsopts
+      +RTS
+      -T
+      -RTS
 
 -- Tests which require system calls provided by `Win32-network` or `network`
 -- library.  These tests are compiled natively & run on all supported
@@ -459,12 +467,13 @@ test-suite io-tests
   else
     build-depends: process
 
-  ghc-options:
-    -threaded
-    -rtsopts
-    +RTS
-    -T
-    -RTS
+  if !arch(wasm32)
+    ghc-options:
+      -threaded
+      -rtsopts
+      +RTS
+      -T
+      -RTS
 
 executable demo-chain-sync
   import: ghc-options
@@ -511,10 +520,13 @@ benchmark sim-benchmarks
 
   ghc-options:
     -fno-ignore-asserts
-    -with-rtsopts=-A32m
-    +RTS
-    -T
-    -RTS
+
+  if !arch(wasm32)
+    ghc-options:
+      -with-rtsopts=-A32m
+      +RTS
+      -T
+      -RTS
 
   -- We use this option to avoid skewed results due to changes in cache-line
   -- alignment. See
