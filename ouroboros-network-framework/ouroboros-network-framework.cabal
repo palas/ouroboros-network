@@ -147,6 +147,8 @@ library testlib
     -Wno-unused-packages
 
 test-suite sim-tests
+  if arch(wasm32)
+    buildable: False
   type: exitcode-stdio-1.0
   main-is: Main.hs
   hs-source-dirs: sim-tests
@@ -207,6 +209,8 @@ test-suite sim-tests
     cpp-options: -DOUROBOROS_NETWORK_IPV6
 
 test-suite io-tests
+  if arch(wasm32)
+    buildable: False
   type: exitcode-stdio-1.0
   main-is: Main.hs
   hs-source-dirs: io-tests
@@ -255,6 +259,8 @@ test-suite io-tests
     -Wunused-packages
 
 executable demo-ping-pong
+  if arch(wasm32)
+    buildable: False
   hs-source-dirs: demo
   main-is: ping-pong.hs
   build-depends:
@@ -283,6 +289,8 @@ executable demo-ping-pong
     -Wunused-packages
 
 executable demo-connection-manager
+  if arch(wasm32)
+    buildable: False
   hs-source-dirs: demo
   main-is: connection-manager.hs
   build-depends:
